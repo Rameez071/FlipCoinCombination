@@ -1,36 +1,72 @@
 #!/bin/bash -x
 
-read -p "how many times you want to flip the for triple combination ? " flips_for_triplet
+echo "This program displays winning percentage of Head or Tail Combination in a Singlet, Doublet and Triplet"
 
-#dictionary declaretion
 
-declare -A TripletDictionary
+read -p "Enter the range for fliping the coin: " ranges
+read -p "Enter the your option:
+         1. Singlet
+         2. Dublet
+         3. Triplet  " selectt
+function flipCoin() {
+   random=$((RANDOM%2))
+   echo $random
+}
 
-#Variables
-heads=0
-tails=0
+function Percentage()
+{
+   range=$1
+   for keyCount in ${!dict[@]}
+   do
+      dict[$keyCount]=`echo "scale=4; ${dict[$keyCount]}/$range*100" | bc`"%"
+      echo "Percentage of $keyCount is: ${dict[$keyCount]} "
+   done
+}
+function sorting() {
+	for val in ${!dict[@]}
+	do
+		echo $val '-' ${dict[$val]}
+	done |
+	sort -rn -k3
+}
+function triplet() {
 
-FLIP=$(($((RANDOM%10))%2))
+   flip=1
+   heads=0
+   tails=0
+   range=$1
+   option=$2
 
-#loop for triplet combination of coins
-for i in `seq $flips_for_triplet`
-do
-        tripletFlip=$(($((RANDOM%8))+1))
-        case $tripletFlip in
-                1)TripletDictionary["key$i"]=`echo "HHH"`;;
-                2)TripletDictionary["key$i"]=`echo "HHT"`;;
-                3)TripletDictionary["key$i"]=`echo "HTH"`;;
-                4)TripletDictionary["key$i"]=`echo "THH"`;;
-		5)TripletDictionary["key$i"]=`echo "TTH"`;;
-                6)TripletDictionary["key$i"]=`echo "THT"`;; 
-		7)TripletDictionary["key$i"]=`echo "HTT"`;;
-		8)TripletDictionary["key$i"]=`echo "TTT"`;;
-		*)TripletDictionary["key$i"]=`echo "NA"`;;
-        esac
-done
+   declare -A dict
 
-#display triplet dictionary and its percentage
-echo "Dictionary to show Triplet Combination : ${TripletDictionary[@]}"
-triplet_count=${#TripletDictionary[@]}
-triplet_percent=`awk 'BEGIN{printf("%0.2f", '$triplet_count'*100)}'`
-echo "Triplet Percentage : $triplet_percent%"
+   for (( count1=1; count1<=range; count1++))
+   do
+      for (( count2=1; count2<=option; count2++ ))
+      do
+         result="$(flipCoin)"
+         if (( $result == $flip  ))
+         then
+            coin+=H
+            ((heads++))
+         else
+            ((tails++))
+            coin+=T
+         fi
+      done
+      ((dict[$coin]++))
+      coin=""
+   done
+   echo "Heads count= $heads"
+   echo "Tails count= $tails"
+   echo ${!dict[@]}
+   echo ${dict[@]}
+   echo "$(Percentage $ranges)"
+	echo "$(sorting)"
+	echo "Winner is:-  $(sorting | head -1)"
+}
+if (( $selectt > 0 && $selectt < 4 ))
+then
+   echo "$(triplet $ranges $selectt)"
+else
+   echo Invalid Choice
+fi
